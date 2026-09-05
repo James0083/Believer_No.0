@@ -21,13 +21,55 @@ export function openFilesApp(startPath = "Desktop") {
 }
 
 function renderFiles(body, startPath) {
-  let path = startPath;
-  body.innerHTML = `<div class="file-crumbs" id="crumbs"></div><div class="file-grid" id="grid"></div>`;
+  const stack = [startPath];
+  let idx = 0;
+
+  body.innerHTML = `
+    <div class="app-toolbar">
+      <button id="files-back">←</button>
+      <button id="files-fwd">→</button>
+      <div class="file-crumbs" id="crumbs" style="border-bottom:none;padding:0;flex:1;overflow-x:auto;white-space:nowrap;"></div>
+    </div>
+    <div class="file-grid" id="grid"></div>
+  `;
   const crumbs = body.querySelector("#crumbs");
   const grid = body.querySelector("#grid");
+  const backBtn = body.querySelector("#files-back");
+  const fwdBtn = body.querySelector("#files-fwd");
+
+  function currentPath() {
+    return stack[idx];
+  }
+
+  function updateNavButtons() {
+    backBtn.disabled = idx <= 0;
+    fwdBtn.disabled = idx >= stack.length - 1;
+  }
+
+  function go(newPath) {
+    stack.splice(idx + 1);
+    stack.push(newPath);
+    idx = stack.length - 1;
+    renderCrumbs();
+    renderGrid();
+  }
+
+  backBtn.addEventListener("click", () => {
+    if (idx <= 0) return;
+    idx -= 1;
+    renderCrumbs();
+    renderGrid();
+  });
+  fwdBtn.addEventListener("click", () => {
+    if (idx >= stack.length - 1) return;
+    idx += 1;
+    renderCrumbs();
+    renderGrid();
+  });
 
   function renderCrumbs() {
-    const parts = path.split("/");
+    updateNavButtons();
+    const parts = currentPath().split("/");
     let acc = "";
     crumbs.innerHTML = parts
       .map((p, i) => {
@@ -36,16 +78,12 @@ function renderFiles(body, startPath) {
       })
       .join(" / ");
     crumbs.querySelectorAll("span").forEach((s) => {
-      s.addEventListener("click", () => {
-        path = s.dataset.path;
-        renderCrumbs();
-        renderGrid();
-      });
+      s.addEventListener("click", () => go(s.dataset.path));
     });
   }
 
   function renderGrid() {
-    const { folders, files } = listChildren(path);
+    const { folders, files } = listChildren(currentPath());
     grid.innerHTML =
       folders
         .map(
@@ -69,11 +107,7 @@ function renderFiles(body, startPath) {
         grid.querySelectorAll(".file-item").forEach((e2) => e2.classList.remove("selected"));
         elm.classList.add("selected");
       });
-      elm.addEventListener("dblclick", () => {
-        path = elm.dataset.folder;
-        renderCrumbs();
-        renderGrid();
-      });
+      elm.addEventListener("dblclick", () => go(elm.dataset.folder));
     });
     grid.querySelectorAll("[data-file]").forEach((elm) => {
       elm.addEventListener("click", () => {
