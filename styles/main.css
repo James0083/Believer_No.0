@@ -90,28 +90,28 @@ img { max-width: 100%; display: block; }
 
 .desktop-icons {
   position: absolute; top: 16px; left: 16px;
-  display: grid; grid-template-columns: repeat(auto-fill, 84px);
-  grid-auto-rows: 88px; gap: 4px;
-  width: 260px;
+  display: grid; grid-template-columns: repeat(auto-fill, 126px);
+  grid-auto-rows: 132px; gap: 6px;
+  width: 390px;
 }
 .desktop-icon {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  width: 80px; padding: 6px 4px; border-radius: 3px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 120px; padding: 9px 6px; border-radius: 4px; cursor: pointer;
   color: #f1f1ee; text-align: center; user-select: none;
 }
 .desktop-icon:hover, .desktop-icon:focus-visible { background: rgba(255,255,255,0.12); }
 .desktop-icon.selected { background: var(--selection); color: #10161a; }
-.desktop-icon img { width: 36px; height: 36px; }
+.desktop-icon img { width: 54px; height: 54px; }
 .desktop-icon span {
-  font-size: 11.5px; line-height: 1.25; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-size: 17px; line-height: 1.25; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .desktop-icon.selected span { text-shadow: none; }
 
 .desktop-badge {
-  position: absolute; top: -2px; right: 10px;
-  background: var(--warning); color: white; font-size: 10px;
-  min-width: 15px; height: 15px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+  position: absolute; top: -3px; right: 15px;
+  background: var(--warning); color: white; font-size: 15px;
+  min-width: 22px; height: 22px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
 }
 
 /* ---------------- Taskbar ---------------- */

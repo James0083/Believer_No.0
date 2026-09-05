@@ -42,4 +42,5 @@ export const IMAGE_MANIFEST = {
   "IMG-E01-SCAN": "assets/images/IMG-E01-SCAN.png",
   "IMG-E02-DESK": "assets/images/IMG-E02-DESK.png",
   "IMG-REPORTER-DESK-01": "assets/images/IMG-REPORTER-DESK-01.png",
+  "IMG_SUCHUL_BACKGROUND": "assets/images/IMG_SUCHUL_BACKGROUND.png",
 };
