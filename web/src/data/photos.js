@@ -1,0 +1,55 @@
+export const PHOTOS = [
+  {
+    id: "PHOTO-DESK-STICKY",
+    filename: "책상_메모.jpg",
+    takenAt: "2016-06-01",
+    modifiedAt: "2016-06-01",
+    caption: "선배 책상 위, 포스트잇",
+    camera: "PENTA-S3 (가상)",
+    location: "선배 자택",
+    people: [],
+    sticky: true,
+    clueIds: ["CLUE-STAFF-PASSWORD"],
+  },
+  {
+    id: "PHOTO-EVENT-2016",
+    filename: "행사_2016.jpg",
+    takenAt: "2016-05-25",
+    modifiedAt: "2016-05-25",
+    caption: "2016년 창립기념 행사",
+    camera: "폰카메라 (가상)",
+    location: "{{CULT_NAME}} 본당",
+    people: ["LEADER", "DISCIPLE_ZERO"],
+    imageId: "IMG-SUNHEE-EVENT-01",
+    clueIds: [],
+  },
+  {
+    id: "PHOTO-EVENT-2010",
+    filename: "행사_2010.jpg",
+    takenAt: "2010-05-20",
+    modifiedAt: "2016-05-02",
+    caption: "2010년 창립기념 행사 (자료실에서 다운로드)",
+    camera: "-",
+    location: "{{CULT_NAME}} 본당",
+    people: ["LEADER", "DISCIPLE_ZERO"],
+    imageId: "IMG-EVENT-GROUP-01",
+    clueIds: [],
+  },
+  {
+    id: "PHOTO-EARLY-GROUP",
+    filename: "초기모임_추정.jpg",
+    takenAt: "1997-11 (추정)",
+    modifiedAt: "2016-06-19",
+    caption: "창립 이전으로 추정되는 모임 사진",
+    camera: "-",
+    location: "장소 미상",
+    people: ["DISCIPLE_ZERO"],
+    note: "이정호로 보이는 인물은 없음. 윤선희로 보이는 인물이 이미 중심에 있음.",
+    imageId: "IMG-EARLY-GROUP-01",
+    clueIds: ["CLUE-EARLY-PHOTO"],
+  },
+];
+
+export function getPhoto(id) {
+  return PHOTOS.find((p) => p.id === id);
+}
