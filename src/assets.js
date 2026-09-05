@@ -1,6 +1,6 @@
 // 나중에 실제 아이콘/캐릭터 이미지로 교체될 수 있는 SVG 파일들의 경로 모음.
-// 실제 파일은 web/assets/images/ 폴더에 있다.
-// 교체 방법: 아래 값은 그대로 두고 web/assets/images/ 안의 같은 파일명을
+// 실제 파일은 assets/images/ 폴더에 있다.
+// 교체 방법: 아래 값은 그대로 두고 assets/images/ 안의 같은 파일명을
 // 실제 이미지로 덮어쓰면 된다 (.svg를 .png 등으로 바꾸려면 아래 경로도 같이 수정).
 
 export const ICON_ASSET_PATHS = {
