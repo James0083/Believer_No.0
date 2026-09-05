@@ -13,22 +13,31 @@ export const PLAYER = {
 
 export const SENIOR = {
   id: "SENIOR",
-  name: "한지훈",
-  placeholder: true, // TODO: 선배 기자 이름/나이/회사 확정 필요
-  age: 34,
-  company: "주간시선",
-  companyEmailDomain: "sisunweekly.local",
-  email: "jihoon.han@sisunweekly.local",
-  osAccountName: "jihoon.han",
-  computerLabel: "HANJIHOON-PC",
+  name: "박수철",
+  givenName: "수철",
+  age: 39,
+  ageIsPlaceholder: true, // TODO: 나이 확정 필요
+  company: "일간초록불",
+  companyPlaceholder: true, // TODO: 소속 언론사명 확정 필요
+  email: "scpark@greenlightdaily.co.kr",
+  companyEmailDomain: "greenlightdaily.co.kr", // 위 이메일 도메인과 일치시킴 (확정)
+  // 계정명/PC 이름은 임의로 로마자 표기를 지어내지 않는다.
+  // 실제 값이 정해지면 여기만 채우면 된다.
+  osAccountName: "__SENIOR_ACCOUNT__",
+  computerLabel: "__SENIOR_PC_NAME__",
+  // 선배 컴퓨터 로그인 암호. 아내 이름("지혜") + "러브"를 한글 자판이 아닌
+  // 영문 자판(2벌식 매핑) 그대로 입력한 문자열: "지혜러브" -> "wlgPfjqm".
+  // 로그인 화면에서는 영문(A-Z, a-z)만 입력되도록 필터링한다.
+  loginPassword: "wlgPfjqm",
 };
 
 export const SENIOR_FAMILY = {
   id: "SENIOR_FAMILY",
-  name: "한지영",
-  givenName: "지영", // 가족끼리는 성을 떼고 이름만 부른다
+  name: "서지혜",
+  givenName: "지혜", // 가족끼리는 성을 떼고 이름만 부른다
   placeholder: true, // TODO: 선배 기자 가족 중 교단에 빠진 사람 확정 필요
-  relationToSenior: "여동생",
+  relationToSenior: "아내",
+  age: 39,
 };
 
 // 인물 키는 이름이 아니라 "역할"로 둔다. 이름/나이가 바뀌어도
@@ -68,7 +77,7 @@ export const PEOPLE = {
   EDITOR: {
     id: "EDITOR",
     name: "박준혁",
-    publicRole: "주간시선 편집장",
+    publicRole: "{{SENIOR_COMPANY}} 편집장",
     placeholder: true,
     avatarSeed: "editor",
     avatarColor: "#686E72",
@@ -107,6 +116,7 @@ export function buildTokenMap() {
   return {
     PLAYER: PLAYER.displayName,
     SENIOR: SENIOR.name,
+    SENIOR_GIVEN: SENIOR.givenName,
     SENIOR_COMPANY: SENIOR.company,
     SENIOR_COMPANY_DOMAIN: SENIOR.companyEmailDomain,
     SENIOR_EMAIL: SENIOR.email,

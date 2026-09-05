@@ -1,4 +1,4 @@
-import { iconDataUri, resolveSceneImage } from "./avatar.js";
+import { iconDataUri } from "./avatar.js";
 import { openMailApp } from "./apps/mail.js";
 import { openMessengerApp } from "./apps/messenger.js";
 import { openPhoneApp } from "./apps/phone.js";
@@ -42,11 +42,6 @@ export function initDesktop() {
   const iconsWrap = document.getElementById("desktop-icons");
   const taskWindows = document.getElementById("taskbar-windows");
   const clock = document.getElementById("tray-clock");
-
-  const wallpaper = resolveSceneImage("IMG-REPORTER-DESK-01", "선배의 책상");
-  desktop.style.backgroundImage = `linear-gradient(rgba(20,26,30,0.55), rgba(20,26,30,0.55)), url("${wallpaper}")`;
-  desktop.style.backgroundSize = "cover";
-  desktop.style.backgroundPosition = "center";
 
   iconsWrap.innerHTML = ICONS.map(
     (i) => `<div class="desktop-icon" data-id="${i.id}" tabindex="0">

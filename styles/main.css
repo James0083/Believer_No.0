@@ -78,6 +78,7 @@ img { max-width: 100%; display: block; }
   background: var(--accent); color: white; cursor: pointer;
 }
 .login-hint { font-size: 11px; color: #7c8a90; margin-top: 8px; }
+.login-card .login-error { font-size: 11px; color: #c96b5a; margin-top: 8px; min-height: 14px; }
 
 /* ---------------- Desktop ---------------- */
 #desktop {

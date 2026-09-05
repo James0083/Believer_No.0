@@ -1,6 +1,6 @@
 import { EMAILS } from "../data/emails.js";
 import { CAPTURE_FRAGMENT_LINES } from "../data/capturedChat.js";
-import { renderText } from "../text.js";
+import { renderText, renderTextSafe } from "../text.js";
 import { markEmailRead, isEmailRead } from "../state.js";
 import { discover } from "../clueEngine.js";
 import { iconDataUri, chatScreenshotDataUri } from "../avatar.js";
@@ -60,7 +60,7 @@ function renderMail(body) {
         const unread = !isEmailRead(e.id) && e.folder !== "sent" && e.folder !== "draft";
         return `<div class="list-row ${unread ? "unread" : ""} ${currentEmailId === e.id ? "active" : ""}" data-id="${e.id}">
           <div class="row-title">${renderText(e.subject)}</div>
-          <div class="row-meta">${renderText(e.from)} · ${e.sentAt.slice(0, 10)}</div>
+          <div class="row-meta">${renderTextSafe(e.from)} · ${e.sentAt.slice(0, 10)}</div>
         </div>`;
       })
       .join("") || `<div class="pane-content" style="color:var(--text-secondary);">비어있음</div>`;
@@ -83,8 +83,8 @@ function renderMail(body) {
       <div class="pane-content">
         <div class="mail-header">
           <h3>${renderText(e.subject)}</h3>
-          <div class="mail-meta-row">보낸사람: ${renderText(e.from)}</div>
-          <div class="mail-meta-row">받는사람: ${(e.to || []).map(renderText).join(", ") || "-"}</div>
+          <div class="mail-meta-row">보낸사람: ${renderTextSafe(e.from)}</div>
+          <div class="mail-meta-row">받는사람: ${(e.to || []).map(renderTextSafe).join(", ") || "-"}</div>
           <div class="mail-meta-row">${e.sentAt.replace("T", " ")}</div>
         </div>
         <div class="mail-body">${renderText(e.body)}</div>

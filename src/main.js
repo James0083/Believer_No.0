@@ -2,7 +2,7 @@ import { SENIOR } from "./config.js";
 import { renderText } from "./text.js";
 import { personAvatarDataUri } from "./avatar.js";
 import { initDesktop } from "./desktop.js";
-import { resetState, hasClue, onFlagSet } from "./state.js";
+import { resetState, hasClue, hasFlag, setFlag, onFlagSet } from "./state.js";
 import { FLAGS } from "./data/flags.js";
 
 function renderTokensInDom() {
@@ -16,7 +16,8 @@ function showBoot() {
   boot.querySelector(".boot-computer-label").textContent = SENIOR.computerLabel;
   setTimeout(() => {
     boot.style.display = "none";
-    showLogin();
+    if (hasFlag(FLAGS.SENIOR_LOGIN_SUCCESS)) enterDesktop();
+    else showLogin();
   }, 1500);
 }
 
@@ -25,10 +26,33 @@ function showLogin() {
   login.style.display = "flex";
   login.querySelector(".login-avatar-img").src = personAvatarDataUri(SENIOR.name, "senior", "#446A82");
   login.querySelector(".login-account-name").textContent = SENIOR.osAccountName;
-  login.querySelector("#login-btn").addEventListener("click", enterDesktop, { once: true });
-  login.querySelector("#login-pw").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") enterDesktop();
+
+  const pwInput = login.querySelector("#login-pw");
+  const errorEl = login.querySelector("#login-pw-error");
+  const btn = login.querySelector("#login-btn");
+
+  // 한글 IME로 조합돼 들어오는 문자를 포함해, 영문(A-Z/a-z) 외의 입력은
+  // 즉시 걸러낸다. 이 암호는 한글 단어를 영문 자판으로 그대로 친 것이라
+  // 실제로 한글이 입력되면 안 된다.
+  pwInput.addEventListener("input", () => {
+    const filtered = pwInput.value.replace(/[^A-Za-z]/g, "");
+    if (filtered !== pwInput.value) pwInput.value = filtered;
   });
+
+  function submit() {
+    if (pwInput.value === SENIOR.loginPassword) {
+      setFlag(FLAGS.SENIOR_LOGIN_SUCCESS);
+      enterDesktop();
+    } else {
+      errorEl.textContent = "암호가 올바르지 않습니다.";
+    }
+  }
+
+  btn.addEventListener("click", submit);
+  pwInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submit();
+  });
+  pwInput.focus();
 }
 
 function enterDesktop() {
