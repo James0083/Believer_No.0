@@ -135,7 +135,7 @@ export function iconDataUri(kind) {
   const shapes = {
     mail: '<rect x="20" y="34" width="88" height="60" rx="4" fill="#F1F1EE" stroke="#25282A" stroke-width="3"/><path d="M20 36 L64 72 L108 36" fill="none" stroke="#25282A" stroke-width="3"/>',
     browser:
-      '<circle cx="64" cy="64" r="42" fill="#F1F1EE" stroke="#25282A" stroke-width="3"/><path d="M22 64 H106 M64 22 V106 M35 38 Q64 64 35 90 M93 38 Q64 64 93 90" fill="none" stroke="#25282A" stroke-width="2.5"/>',
+      '<circle cx="64" cy="64" r="42" fill="#F1F1EE" stroke="#25282A" stroke-width="3"/><path d="M22 64 H106 M64 22 V106" fill="none" stroke="#25282A" stroke-width="2.5"/><path d="M27 46 Q64 54 101 46" fill="none" stroke="#25282A" stroke-width="2"/><path d="M27 82 Q64 74 101 82" fill="none" stroke="#25282A" stroke-width="2"/>',
     messenger:
       '<rect x="18" y="26" width="92" height="64" rx="10" fill="#F1F1EE" stroke="#25282A" stroke-width="3"/><path d="M40 90 L40 106 L60 90 Z" fill="#F1F1EE" stroke="#25282A" stroke-width="3"/>',
     files:

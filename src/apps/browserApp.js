@@ -2,28 +2,30 @@ import { renderText } from "../text.js";
 import {
   markPageVisited,
   setFlag,
+  clearFlag,
   setStaffLoggedIn,
   hasFlag,
   getState,
   pushSearch,
 } from "../state.js";
 import { discover } from "../clueEngine.js";
-import { STAFF_CREDENTIALS, PEOPLE } from "../config.js";
+import { STAFF_CREDENTIALS, PEOPLE, PORTAL } from "../config.js";
 import { iconDataUri, resolveSceneImage, personAvatarDataUri } from "../avatar.js";
 import { getPhoto } from "../data/photos.js";
 import { openWindow } from "../windowManager.js";
+import { restrictToAlphanumeric, restrictToAsciiPassword } from "../ui.js";
 import { FLAGS } from "../data/flags.js";
 import { BOARD_POSTS, EVENTS, CULT_ABOUT_TEXT, CULT_LEADER_BIO, CULT_BELIEFS } from "../data/cultSite.js";
 import { findResultForQuery, SEARCH_RESULTS } from "../data/search.js";
 import { MEMBER_ROWS, STAFF_MESSENGER_LOG, STAFF_DOCS } from "../data/staffSite.js";
 import { ARCHIVE_OLD_MEMBER_ROWS, ARCHIVE_INTRO } from "../data/archive.js";
 
-const BOOKMARKS_BASE = [{ label: "포털", url: "portal:/home" }, { label: "{{CULT_NAME}}", url: "cult:/home" }];
+const BOOKMARKS_BASE = [{ label: "{{PORTAL_NAME}}", url: "diver:/home" }, { label: "{{CULT_NAME}}", url: "cult:/home" }];
 
 function prettyUrl(key) {
   const domain = renderText("{{CULT_DOMAIN}}");
-  if (key.startsWith("portal:")) return "portal.local" + key.slice(7);
-  if (key.startsWith("search:")) return "search.local" + key.slice(7);
+  const portalDomain = renderText("{{PORTAL_DOMAIN}}");
+  if (key.startsWith("diver:")) return portalDomain + key.slice(6);
   if (key.startsWith("cult:")) return domain + key.slice(5);
   if (key.startsWith("staff:")) return "staff." + domain + key.slice(6);
   if (key.startsWith("archive:")) return "archive." + domain + key.slice(8);
@@ -32,16 +34,16 @@ function prettyUrl(key) {
 
 function parseTypedUrl(text) {
   const domain = renderText("{{CULT_DOMAIN}}");
+  const portalDomain = renderText("{{PORTAL_DOMAIN}}");
   const t = text.trim();
-  if (t.startsWith("portal.local")) return "portal:" + (t.slice("portal.local".length) || "/home");
-  if (t.startsWith("search.local")) return "search:" + (t.slice("search.local".length) || "/");
+  if (t.startsWith(portalDomain)) return "diver:" + (t.slice(portalDomain.length) || "/home");
   if (t.startsWith("staff." + domain)) return "staff:" + (t.slice(("staff." + domain).length) || "/login");
   if (t.startsWith("archive." + domain)) return "archive:" + (t.slice(("archive." + domain).length) || "/home");
   if (t.startsWith(domain)) return "cult:" + (t.slice(domain.length) || "/home");
   return null;
 }
 
-export function openBrowserApp(initialUrl = "portal:/home") {
+export function openBrowserApp(initialUrl = "diver:/home") {
   openWindow({
     appId: "browser",
     title: "브라우저",
@@ -59,16 +61,18 @@ function renderBrowser(body, initialUrl) {
   let idx = 0;
 
   body.innerHTML = `
-    <div class="app-toolbar">
-      <button id="btn-back">←</button>
-      <button id="btn-fwd">→</button>
-      <button id="btn-refresh">⟳</button>
-      <input type="text" id="addr-bar" />
-      <button id="btn-go">이동</button>
-      <button id="btn-bookmarks">즐겨찾기</button>
-      <button id="btn-history">기록</button>
+    <div class="browser-shell">
+      <div class="app-toolbar">
+        <button id="btn-back">←</button>
+        <button id="btn-fwd">→</button>
+        <button id="btn-refresh">⟳</button>
+        <input type="text" id="addr-bar" />
+        <button id="btn-go">이동</button>
+        <button id="btn-bookmarks">즐겨찾기</button>
+        <button id="btn-history">기록</button>
+      </div>
+      <div class="page-frame" id="page-frame"></div>
     </div>
-    <div class="page-frame" id="page-frame"></div>
   `;
 
   const addr = body.querySelector("#addr-bar");
@@ -104,7 +108,7 @@ function renderBrowser(body, initialUrl) {
   function tryNavigateTyped() {
     const parsed = parseTypedUrl(addr.value);
     if (parsed) go(parsed);
-    else go("portal:/notfound");
+    else go("diver:/notfound");
   }
 
   body.querySelector("#btn-bookmarks").addEventListener("click", () => {
@@ -162,70 +166,206 @@ function wireNav(frame, go) {
 function renderRoute(key, frame, go) {
   const [prefix, rest = "/"] = [key.split(":")[0], key.split(":")[1]];
 
-  if (prefix === "portal") return renderPortal(rest, frame, go);
-  if (prefix === "search") return renderSearch(rest, frame, go);
+  if (prefix === "diver") return renderDiver(rest, frame, go);
   if (prefix === "cult") return renderCult(rest, frame, go);
   if (prefix === "staff") return renderStaff(rest, frame, go);
   if (prefix === "archive") return renderArchive(rest, frame, go);
   frame.innerHTML = `<div class="pane-content">페이지를 찾을 수 없습니다.</div>`;
 }
 
-function renderPortal(path, frame, go) {
-  frame.innerHTML = `
-    <div class="portal-home">
-      <div class="logo">Portal</div>
-      <div class="search-box-row">
-        <input type="text" id="portal-q" placeholder="검색어를 입력하세요" />
-        <button id="portal-search-btn">검색</button>
+// ---------------- 다이버(DIVER) 포털 ----------------
+// 네이버류 포털의 뼈대(헤더/검색/카테고리 탭)만 구현. 로그인/블로그/뉴스/
+// 메일/카페의 실제 콘텐츠는 추후 데이터로 채워 넣는다 (지금은 placeholder).
+
+const DIVER_NAV_ITEMS = [
+  ["home", "홈"],
+  ["news", "뉴스"],
+];
+
+function diverHeader(active, query = "") {
+  return `
+    <div class="diver-header">
+      <div class="diver-logo" data-nav="diver:/home">{{PORTAL_EN}}</div>
+      <div class="diver-search">
+        <input type="text" id="diver-search-input" value="${query}" placeholder="검색어를 입력하세요" />
+        <button id="diver-search-btn">검색</button>
       </div>
-      <ul class="portal-news">
-        <li>[사회] 지역 공동체 모임, 봉사활동으로 눈길</li>
-        <li>[생활] 요즘 뜨는 소규모 신앙 모임들</li>
-        <li>[날씨] 이번 주말 전국 대체로 맑음</li>
-      </ul>
+    </div>
+    <div class="diver-nav">
+      ${DIVER_NAV_ITEMS.map(([k, label]) => `<a data-nav="diver:/${k}" class="${active === k ? "active" : ""}">${label}</a>`).join("")}
     </div>
   `;
-  const input = frame.querySelector("#portal-q");
-  const doSearch = () => { if (input.value.trim()) go("search:/?q=" + encodeURIComponent(input.value.trim())); };
-  frame.querySelector("#portal-search-btn").addEventListener("click", doSearch);
+}
+
+function diverLoginWidget() {
+  return `
+    <div class="diver-login-box sidebar">
+      <input type="text" id="diver-home-id" placeholder="아이디" />
+      <input type="password" id="diver-home-pw" placeholder="비밀번호" />
+      <button id="diver-home-login-btn">로그인</button>
+      <div class="diver-note" id="diver-home-login-error"></div>
+    </div>
+  `;
+}
+
+function diverQuickMenu() {
+  return `
+    <div class="diver-quickmenu">
+      <div class="diver-quickmenu-title">내 메뉴</div>
+      <a data-nav="diver:/mail">메일</a>
+      <a data-nav="diver:/blog">내 블로그</a>
+      <a data-nav="diver:/cafe">내 카페</a>
+      <a href="#" id="diver-logout-link">로그아웃</a>
+    </div>
+  `;
+}
+
+function diverLoginGate() {
+  return `<div class="diver-placeholder">로그인이 필요한 서비스입니다.<br/><br/><button data-nav="diver:/home">홈으로 가서 로그인</button></div>`;
+}
+
+function wireDiverChrome(frame, go) {
+  wireNav(frame, go);
+  const input = frame.querySelector("#diver-search-input");
+  const btn = frame.querySelector("#diver-search-btn");
+  if (!input || !btn) return;
+  const doSearch = () => { if (input.value.trim()) go("diver:/search?q=" + encodeURIComponent(input.value.trim())); };
+  btn.addEventListener("click", doSearch);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(); });
 }
 
-function renderSearch(path, frame, go) {
-  const params = new URLSearchParams(path.split("?")[1] || "");
-  const q = params.get("q") || "";
-  frame.innerHTML = `
-    <div style="padding:20px 20px 0;text-align:center;background:#fafafa;">
-      <div class="search-box-row" style="margin-bottom:14px;">
-        <input type="text" id="portal-q" value="${q}" />
-        <button id="portal-search-btn">검색</button>
-      </div>
-    </div>
-    <div class="search-results" id="results"></div>
-  `;
-  const input = frame.querySelector("#portal-q");
-  const doSearch = () => { if (input.value.trim()) go("search:/?q=" + encodeURIComponent(input.value.trim())); };
-  frame.querySelector("#portal-search-btn").addEventListener("click", doSearch);
-  input.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(); });
+function diverPlaceholder(label) {
+  return `<div class="diver-placeholder">${label} 콘텐츠는 추후 추가될 예정입니다.</div>`;
+}
 
-  const results = frame.querySelector("#results");
-  if (!q) { results.innerHTML = `<p style="color:#777;">검색어를 입력하세요.</p>`; return; }
-  pushSearch(q);
-  const group = findResultForQuery(q);
-  if (!group || (group.requires && !group.requires.every((r) => hasFlag(r)))) {
-    results.innerHTML = `<p style="color:#777;">'${q}'에 대한 검색결과가 없습니다.</p>`;
-    return;
+function diverStubCards() {
+  return `<div class="diver-card-grid">${[1, 2, 3]
+    .map(() => `<div class="diver-card"><div class="thumb"></div><div class="body"><div class="title">준비 중</div><div class="meta">-</div></div></div>`)
+    .join("")}</div>`;
+}
+
+function renderDiver(path, frame, go) {
+  const segments = path.split("/").filter(Boolean);
+  const [page, queryPart] = (segments[0] || "home").split("?");
+
+  const diverLoggedIn = hasFlag(FLAGS.DIVER_LOGIN_SUCCESS);
+
+  if (page === "home") {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("home")}
+        <div class="diver-body">
+          <div class="diver-home-grid">
+            <div class="diver-home-main">${diverPlaceholder("메인 화면")}</div>
+            <div class="diver-home-side">${diverLoggedIn ? diverQuickMenu() : diverLoginWidget()}</div>
+          </div>
+        </div>
+      </div>
+    `);
+  } else if (page === "mail") {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("")}
+        <div class="diver-body">
+          <h2 class="diver-section-title">메일</h2>
+          ${diverLoggedIn ? diverPlaceholder("메일함") : diverLoginGate()}
+        </div>
+      </div>
+    `);
+  } else if (page === "cafe") {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("")}
+        <div class="diver-body">
+          <h2 class="diver-section-title">내 카페</h2>
+          ${diverLoggedIn ? diverPlaceholder("카페") + diverStubCards() : diverLoginGate()}
+        </div>
+      </div>
+    `);
+  } else if (page === "blog") {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("")}
+        <div class="diver-body">
+          <h2 class="diver-section-title">내 블로그</h2>
+          ${diverLoggedIn ? diverPlaceholder("블로그") + diverStubCards() : diverLoginGate()}
+        </div>
+      </div>
+    `);
+  } else if (page === "news") {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("news")}
+        <div class="diver-body">
+          <h2 class="diver-section-title">뉴스</h2>
+          <div class="diver-tabs-sub">
+            <span class="active">전체</span><span>정치</span><span>경제</span><span>사회</span><span>생활/문화</span>
+          </div>
+          ${diverPlaceholder("뉴스")}
+        </div>
+      </div>
+    `);
+  } else if (page === "search") {
+    const params = new URLSearchParams(queryPart || "");
+    const q = params.get("q") || "";
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("", q)}
+        <div class="search-results" id="results"></div>
+      </div>
+    `);
+    const results = frame.querySelector("#results");
+    if (!q) {
+      results.innerHTML = `<p style="color:#777;">검색어를 입력하세요.</p>`;
+    } else {
+      pushSearch(q);
+      const group = findResultForQuery(q);
+      if (!group || (group.requires && !group.requires.every((r) => hasFlag(r)))) {
+        results.innerHTML = `<p style="color:#777;">'${q}'에 대한 검색결과가 없습니다.</p>`;
+      } else {
+        const r = SEARCH_RESULTS[group.resultId];
+        results.innerHTML = `
+          <div class="search-result-item">
+            <div class="sr-url">${renderText(r.url)}</div>
+            <div class="sr-title" data-goto="${r.navigateTo || ""}">${renderText(r.title)}</div>
+            <div class="sr-desc">${renderText(r.desc)}</div>
+          </div>
+        `;
+        const titleEl = results.querySelector(".sr-title");
+        if (r.navigateTo) titleEl.addEventListener("click", () => go(r.navigateTo));
+      }
+    }
+  } else {
+    frame.innerHTML = renderText(`
+      <div class="diver-site">
+        ${diverHeader("")}
+        <div class="diver-body"><div class="diver-placeholder">페이지를 찾을 수 없습니다.</div></div>
+      </div>
+    `);
   }
-  const r = SEARCH_RESULTS[group.resultId];
-  results.innerHTML = `
-    <div class="search-result-item">
-      <div class="sr-url">${renderText(r.url)}</div>
-      <div class="sr-title" data-goto="${r.navigateTo || ""}">${renderText(r.title)}</div>
-      <div class="sr-desc">${renderText(r.desc)}</div>
-    </div>
-  `;
-  const titleEl = results.querySelector(".sr-title");
-  if (r.navigateTo) titleEl.addEventListener("click", () => go(r.navigateTo));
+
+  wireDiverChrome(frame, go);
+
+  // 다이버 아이디는 영문·숫자만, 비밀번호는 영문·숫자·특수문자까지 허용
+  // (한글 조합 등 비영문 입력은 둘 다 즉시 걸러냄)
+  restrictToAlphanumeric(frame.querySelector("#diver-home-id"));
+  restrictToAsciiPassword(frame.querySelector("#diver-home-pw"));
+
+  frame.querySelector("#diver-home-login-btn")?.addEventListener("click", () => {
+    const idv = frame.querySelector("#diver-home-id").value.trim();
+    const pwv = frame.querySelector("#diver-home-pw").value.trim();
+    if (idv && pwv) {
+      setFlag(FLAGS.DIVER_LOGIN_SUCCESS);
+      go("diver:/home");
+    } else {
+      frame.querySelector("#diver-home-login-error").textContent = "아이디와 비밀번호를 입력해주세요.";
+    }
+  });
+  frame.querySelector("#diver-logout-link")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    clearFlag(FLAGS.DIVER_LOGIN_SUCCESS);
+    go("diver:/home");
+  });
 }
 
 function renderCult(path, frame, go) {

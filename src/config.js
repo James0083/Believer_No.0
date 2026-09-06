@@ -84,6 +84,22 @@ export const PEOPLE = {
   },
 };
 
+// 가상 포털 (선배의 브라우저에서 검색·뉴스·메일 등에 접속하는 가상 사이트).
+// 2010년대 한국 포털의 뼈대만 참고한 완전히 독립된 가상 서비스.
+export const PORTAL = {
+  id: "PORTAL",
+  name: "다이버",
+  englishName: "DIVER",
+  domain: "diver.com",
+  colors: {
+    primary: "#03C75A",
+    primaryDark: "#02A94D",
+    primaryDarker: "#018C40",
+    primaryLight: "#E9FBEF",
+    primaryLighter: "#F2FDF6",
+  },
+};
+
 export const CULT = {
   name: "청림회",
   placeholderName: true, // TODO: 교단 정식명/약칭 확정 필요
@@ -139,6 +155,9 @@ export function buildTokenMap() {
     CULT_LEADER_HONORIFIC: CULT.leaderHonorific,
     CULT_FOUNDED: CULT.founded,
     CULT_DOMAIN: CULT.domain,
+    PORTAL_NAME: PORTAL.name,
+    PORTAL_EN: PORTAL.englishName,
+    PORTAL_DOMAIN: PORTAL.domain,
   };
 }
 

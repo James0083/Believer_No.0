@@ -75,6 +75,12 @@ export const setFlag = (flag) => {
   return added;
 };
 export const setFlags = (flags = []) => flags.forEach(setFlag);
+export const clearFlag = (flag) => {
+  if (state.flags.includes(flag)) {
+    state.flags = state.flags.filter((f) => f !== flag);
+    persist();
+  }
+};
 
 export const hasClue = (id) => state.discoveredClues.includes(id);
 export const discoverClue = (id) => {

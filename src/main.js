@@ -4,6 +4,7 @@ import { personAvatarDataUri } from "./avatar.js";
 import { initDesktop } from "./desktop.js";
 import { resetState, hasClue, hasFlag, setFlag, onFlagSet } from "./state.js";
 import { FLAGS } from "./data/flags.js";
+import { restrictToAlpha } from "./ui.js";
 
 function renderTokensInDom() {
   document.querySelectorAll("[data-t]").forEach((el) => {
@@ -34,10 +35,7 @@ function showLogin() {
   // 한글 IME로 조합돼 들어오는 문자를 포함해, 영문(A-Z/a-z) 외의 입력은
   // 즉시 걸러낸다. 이 암호는 한글 단어를 영문 자판으로 그대로 친 것이라
   // 실제로 한글이 입력되면 안 된다.
-  pwInput.addEventListener("input", () => {
-    const filtered = pwInput.value.replace(/[^A-Za-z]/g, "");
-    if (filtered !== pwInput.value) pwInput.value = filtered;
-  });
+  restrictToAlpha(pwInput);
 
   function submit() {
     if (pwInput.value === SENIOR.loginPassword) {
