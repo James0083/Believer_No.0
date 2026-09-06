@@ -165,7 +165,7 @@ function openRosterViewer() {
       function draw(revealed) {
         body.innerHTML = `
           <div class="doc-scan-wrap">
-            <img src="${resolveSceneImage("IMG-E01-SCAN", "초기 신도 명부 스캔")}" style="max-width:280px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);" />
+            <img src="${resolveSceneImage("IMG-E01-SCAN", "초기 신도 명부 스캔")}" class="zoomable-img" alt="초기 신도 명부 스캔" style="max-width:280px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);" />
             <table class="staff-table" style="max-width:420px;margin:0 auto;background:#f4f1e8;">
               <thead><tr><th>번호</th><th>이름</th><th>가입</th><th>비고</th></tr></thead>
               <tbody>
@@ -203,7 +203,7 @@ function openHealthLogViewer() {
     render(body) {
       body.innerHTML = renderText(`
         <div class="pane-content">
-          <img src="${resolveSceneImage("IMG-E02-DESK", "{{LEADER}}의 컨디션 관리 자료 주변")}" style="float:right;max-width:160px;margin:0 0 10px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);" />
+          <img src="${resolveSceneImage("IMG-E02-DESK", "{{LEADER}}의 컨디션 관리 자료 주변")}" class="zoomable-img" alt="{{LEADER}}의 컨디션 관리 자료 주변" style="float:right;max-width:160px;margin:0 0 10px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.25);" />
           <table class="staff-table">
             <thead><tr><th>날짜</th><th>식사</th><th>컨디션</th><th>일정</th><th>의식/설교</th><th>메모</th></tr></thead>
             <tbody>

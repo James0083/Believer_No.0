@@ -35,6 +35,7 @@ html, body {
 }
 button, input, textarea, select { font-family: inherit; font-size: inherit; }
 img { max-width: 100%; display: block; }
+img.zoomable-img { cursor: zoom-in; }
 
 /* ---------------- Boot / Login ---------------- */
 #boot-screen, #login-screen {

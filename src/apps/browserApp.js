@@ -376,7 +376,7 @@ function renderCult(path, frame, go) {
       <div class="cult-site">
         ${cultNav("home")}
         <div class="cult-hero">
-          <img src="${resolveSceneImage("IMG-CULT-HQ-01", "본부 외관")}" style="max-width:320px;margin:0 auto 14px;" />
+          <img src="${resolveSceneImage("IMG-CULT-HQ-01", "본부 외관")}" class="zoomable-img" alt="본부 외관" style="max-width:320px;margin:0 auto 14px;" />
           <h1>{{CULT_NAME}}</h1>
           <p>{{CULT_SLOGAN}}</p>
         </div>
@@ -399,10 +399,10 @@ function renderCult(path, frame, go) {
   } else if (page === "leader") {
     frame.innerHTML = renderText(`<div class="cult-site">${cultNav("leader")}
       <div class="cult-section">
-        <img src="${personAvatarDataUri(PEOPLE.LEADER.name, PEOPLE.LEADER.avatarSeed, PEOPLE.LEADER.avatarColor)}" style="max-width:200px;" />
+        <img src="${personAvatarDataUri(PEOPLE.LEADER.name, PEOPLE.LEADER.avatarSeed, PEOPLE.LEADER.avatarColor)}" class="zoomable-img" alt="{{LEADER}} 프로필" style="max-width:200px;" />
         <h2>{{LEADER}} {{CULT_LEADER_TITLE}}</h2>
         <p style="white-space:pre-wrap;">${renderText(CULT_LEADER_BIO)}</p>
-        <img src="${resolveSceneImage("IMG-JEONGHO-SPEECH-01", "{{LEADER}} 설교 중")}" style="max-width:320px;margin-top:12px;" />
+        <img src="${resolveSceneImage("IMG-JEONGHO-SPEECH-01", "{{LEADER}} 설교 중")}" class="zoomable-img" alt="{{LEADER}} 설교 중" style="max-width:320px;margin-top:12px;" />
       </div>
     </div>`);
   } else if (page === "beliefs") {
@@ -412,10 +412,10 @@ function renderCult(path, frame, go) {
   } else if (page === "events") {
     frame.innerHTML = `<div class="cult-site">${cultNav("events")}
       <div class="cult-hero" style="padding:0;">
-        <img src="${resolveSceneImage("IMG-CULT-HALL-01", "행사장 내부")}" style="width:100%;max-height:220px;object-fit:cover;" />
+        <img src="${resolveSceneImage("IMG-CULT-HALL-01", "행사장 내부")}" class="zoomable-img" alt="행사장 내부" style="width:100%;max-height:220px;object-fit:cover;" />
       </div>
       <div class="cult-section"><h2>행사</h2><div class="cult-card-grid">
-        ${EVENTS.map((e) => `<div class="cult-card"><img src="${resolveSceneImage(getPhoto(e.photoId)?.imageId, renderText(e.title))}"/><b>${renderText(e.title)}</b><br/>${e.date}</div>`).join("")}
+        ${EVENTS.map((e) => `<div class="cult-card"><img src="${resolveSceneImage(getPhoto(e.photoId)?.imageId, renderText(e.title))}" class="zoomable-img" alt="${renderText(e.title)}"/><b>${renderText(e.title)}</b><br/>${e.date}</div>`).join("")}
       </div></div>
     </div>`;
   } else if (page === "board") {
@@ -460,7 +460,7 @@ function renderArchive(path, frame, go) {
       </div>
       <div class="cult-section">
         <h2>초기 모임 사진</h2>
-        <img src="${resolveSceneImage("IMG-EARLY-GROUP-01", "창립 이전 모임")}" style="max-width:320px;" id="archive-photo" />
+        <img src="${resolveSceneImage("IMG-EARLY-GROUP-01", "창립 이전 모임")}" class="zoomable-img" alt="창립 이전 모임" style="max-width:320px;" id="archive-photo" />
         <p style="font-size:12px;color:var(--text-secondary);">1997년경으로 추정. 이정호로 보이는 인물은 없음.</p>
       </div>
       <div class="cult-section">

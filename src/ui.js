@@ -18,6 +18,17 @@ export function openImageModal(src, caption = "") {
   document.body.appendChild(overlay);
 }
 
+// 콘텐츠 사진(단서가 될 만한 이미지)에 class="zoomable-img"만 붙이면
+// 클릭했을 때 자동으로 크게 보기가 뜬다. 앱 시작 시 한 번만 등록한다.
+// (아이콘/아바타처럼 확대해서 볼 필요 없는 이미지에는 이 클래스를 넣지 않는다.)
+export function enableGlobalImageZoom() {
+  document.addEventListener("click", (e) => {
+    const img = e.target.closest("img.zoomable-img");
+    if (!img) return;
+    openImageModal(img.currentSrc || img.src, img.alt || img.dataset.caption || "");
+  });
+}
+
 // input에 한글 등 원치 않는 문자가 (한글 자판 상태로 타이핑되거나 붙여넣기로)
 // 들어와도 즉시 걸러낸다. IME 조합 결과까지 걸러내려면 keydown이 아니라
 // input 이벤트를 써야 한다.

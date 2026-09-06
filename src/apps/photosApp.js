@@ -50,7 +50,7 @@ function openViewer(id, body) {
   (p.clueIds || []).forEach(discover);
   body.innerHTML = `
     <div class="photo-viewer">
-      <img src="${imageFor(p)}" />
+      <img src="${imageFor(p)}" class="zoomable-img" alt="${renderText(p.caption)}" />
       <div class="photo-meta">
         <button id="back-btn">← 목록</button>
         <dl>

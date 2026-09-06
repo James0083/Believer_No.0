@@ -4,7 +4,7 @@ import { personAvatarDataUri } from "./avatar.js";
 import { initDesktop } from "./desktop.js";
 import { resetState, hasClue, hasFlag, setFlag, onFlagSet } from "./state.js";
 import { FLAGS } from "./data/flags.js";
-import { restrictToAlpha } from "./ui.js";
+import { restrictToAlpha, enableGlobalImageZoom } from "./ui.js";
 
 function renderTokensInDom() {
   document.querySelectorAll("[data-t]").forEach((el) => {
@@ -99,4 +99,5 @@ function showEnding() {
 renderTokensInDom();
 setupSaveMenu();
 watchEnding();
+enableGlobalImageZoom();
 showBoot();
