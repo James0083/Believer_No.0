@@ -421,3 +421,63 @@ img { max-width: 100%; display: block; }
 .ending-box { max-width: 640px; background: #1a2226; padding: 32px 36px; border-radius: 6px; line-height: 1.8; }
 .ending-box h2 { margin-top: 0; }
 .ending-box button { margin-top: 18px; padding: 8px 16px; background: var(--accent); color: white; border: none; cursor: pointer; }
+
+/* ============================================================
+   반응형 / 모바일 대응
+   - 좁은 화면에서는 창이 자동으로 최대화된 채로 열린다 (windowManager.js).
+   - 여기서는 그 안의 다단 레이아웃들이 좁은 폭에서도 잘리지 않고
+     세로로 쌓이거나 가로 스크롤되도록 조정한다.
+   ============================================================ */
+@media (max-width: 900px) {
+  .app-3pane { flex-direction: column; height: auto !important; min-height: 100%; }
+  .app-pane { width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--border); }
+  .app-pane:not(:last-child) { max-height: 160px; flex-shrink: 0; }
+  .app-pane:last-child { flex: 1; min-height: 200px; }
+
+  .app-toolbar { flex-wrap: wrap; row-gap: 6px; }
+  .app-toolbar input[type="text"] { flex-basis: 100%; order: 10; }
+
+  .photo-viewer { flex-direction: column; }
+  .photo-viewer img { max-height: 45vh; }
+  .photo-meta { width: 100% !important; border-left: none; border-top: 1px solid var(--border); }
+
+  .diver-home-grid { flex-direction: column; }
+  .diver-home-side { width: 100% !important; }
+
+  .cult-nav, .staff-nav, .diver-nav {
+    overflow-x: auto; white-space: nowrap; flex-wrap: nowrap;
+  }
+  .cult-nav a, .staff-nav a, .diver-nav a { flex-shrink: 0; }
+
+  .pane-content, .staff-content, .cult-section, .board-post-body, .diver-body {
+    overflow-x: auto;
+  }
+  .rule-grid, .file-grid, .photo-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .desktop-icons {
+    width: calc(100vw - 24px);
+    grid-template-columns: repeat(auto-fill, 78px);
+    grid-auto-rows: 92px;
+    gap: 4px;
+  }
+  .desktop-icon { width: 74px; padding: 5px 3px; }
+  .desktop-icon img { width: 38px; height: 38px; }
+  .desktop-icon span { font-size: 11px; }
+  .desktop-badge { top: -2px; right: 8px; font-size: 10px; min-width: 15px; height: 15px; border-radius: 8px; padding: 0 3px; }
+
+  .win-resize-handle { display: none; }
+  .win-titlebar { height: 34px; }
+  .win-title { font-size: 12px; }
+
+  .taskbar-item { max-width: 96px; font-size: 11px; }
+  #tray { padding: 0 8px; gap: 6px; }
+  #start-btn { padding: 0 8px; font-size: 12px; }
+
+  .login-card { min-width: 0; width: 86vw; padding: 22px 18px; }
+
+  .diver-header { flex-wrap: wrap; }
+  .diver-search { max-width: none; width: 100%; order: 2; }
+  .diver-logo { order: 1; }
+}

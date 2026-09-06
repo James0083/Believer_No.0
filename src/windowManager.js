@@ -104,6 +104,11 @@ function makeResizable(win, handle) {
   handle.addEventListener("pointerup", () => { resizing = false; });
 }
 
+const MOBILE_BREAKPOINT = 900; // styles/main.css의 첫 반응형 브레이크포인트와 맞춘다
+export function isMobileViewport() {
+  return window.innerWidth <= MOBILE_BREAKPOINT;
+}
+
 export function openWindow({ appId, title, icon, width = 640, height = 440, x, y, render, singleInstance = true }) {
   markAppOpened(appId);
   if (singleInstance && windows.has(appId)) {
@@ -111,8 +116,9 @@ export function openWindow({ appId, title, icon, width = 640, height = 440, x, y
     return windows.get(appId).api;
   }
 
+  const mobile = isMobileViewport();
   const el = document.createElement("div");
-  el.className = "win";
+  el.className = mobile ? "win maximized" : "win";
   el.dataset.appId = appId;
   el.style.width = width + "px";
   el.style.height = height + "px";
