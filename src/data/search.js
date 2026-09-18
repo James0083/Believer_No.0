@@ -1,7 +1,7 @@
 export const SEARCH_GROUPS = [
   {
     id: "cult_name",
-    aliases: ["{{CULT_NAME}}", "청림회", "cheonglim"],
+    aliases: ["{{CULT_NAME}}", "연성회", "yeonseonghoe"],
     resultId: "SR-CULT-HOME",
   },
   {
@@ -27,13 +27,13 @@ export const SEARCH_RESULTS = {
   "SR-CULT-HOME": {
     title: "{{CULT_NAME}} 공식 홈페이지",
     url: "{{CULT_DOMAIN}}",
-    desc: "마음이 맑아지는 곳, {{CULT_NAME}}에 오신 것을 환영합니다.",
+    desc: "봉사·상담·명상이 함께하는 곳, {{CULT_NAME}}에 오신 것을 환영합니다.",
     navigateTo: "cult:/home",
   },
   "SR-LEADER": {
-    title: "{{LEADER}} {{CULT_LEADER_TITLE}} 소개 | {{CULT_NAME}}",
+    title: "{{LEADER}} 소개 | {{CULT_NAME}}",
     url: "{{CULT_DOMAIN}}/leader",
-    desc: "{{CULT_NAME}}를 이끌어온 {{LEADER}} {{CULT_LEADER_TITLE}}를 소개합니다.",
+    desc: "{{CULT_NAME}}를 이끌어온 {{LEADER}}, '{{CULT_LEADER_EPITHET}}'를 소개합니다.",
     navigateTo: "cult:/leader",
   },
   "SR-STAFF-LOGIN": {

@@ -13,6 +13,7 @@ function emptyState() {
     flags: [],
     searchHistory: [],
     loggedInStaff: false,
+    diverAccountId: "",
     playerNotes: "",
   };
 }
@@ -116,6 +117,15 @@ export function isPageVisited(url) {
 export function setStaffLoggedIn(v) {
   state.loggedInStaff = v;
   persist();
+}
+
+export function setDiverAccountId(id) {
+  state.diverAccountId = id;
+  persist();
+}
+
+export function getDiverAccountId() {
+  return state.diverAccountId;
 }
 
 export function setPlayerNotes(text) {

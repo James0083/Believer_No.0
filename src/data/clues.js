@@ -22,7 +22,7 @@ export const CLUES = [
   {
     id: "CLUE-FOLLOWER-CHAT-FRAGMENT",
     title: "심야 메시지 캡처",
-    playerFacingText: "{{LEADER}}과(와) {{FOLLOWER}} 사이의 은밀한 심야 메시지 캡처가 발견된다.",
+    playerFacingText: "{{LEADER}}와 {{FOLLOWER}} 사이의 은밀한 심야 메시지 캡처가 발견된다.",
     requires: [],
     unlocks: [FLAGS.FOUND_FOLLOWER_CHAT],
     importance: "critical",

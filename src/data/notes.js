@@ -14,7 +14,7 @@ export const REPORTER_NOTES = [
     title: "{{FOLLOWER_GIVEN}} 건 정리",
     date: "2016-05-21",
     body:
-      "캡처만 보면 {{LEADER}}이(가) {{FOLLOWER}}를 이용하는 것처럼 보인다.\n" +
+      "캡처만 보면 {{LEADER}}가 {{FOLLOWER}}를 이용하는 것처럼 보인다.\n" +
       "근데 뭔가 걸린다. {{FOLLOWER_GIVEN}}씨 쪽에서 먼저 말 거는 것도 있었던 것 같은데,\n" +
       "전체 대화를 못 봐서 확신은 안 선다.",
   },

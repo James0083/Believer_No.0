@@ -38,7 +38,7 @@ export const PHOTOS = [
   {
     id: "PHOTO-EARLY-GROUP",
     filename: "초기모임_추정.jpg",
-    takenAt: "1997-11 (추정)",
+    takenAt: "1998-06 (추정)",
     modifiedAt: "2016-06-19",
     caption: "창립 이전으로 추정되는 모임 사진",
     camera: "-",

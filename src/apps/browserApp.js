@@ -7,9 +7,11 @@ import {
   hasFlag,
   getState,
   pushSearch,
+  setDiverAccountId,
+  getDiverAccountId,
 } from "../state.js";
 import { discover } from "../clueEngine.js";
-import { STAFF_CREDENTIALS, PEOPLE, PORTAL } from "../config.js";
+import { STAFF_CREDENTIALS, PEOPLE, PORTAL, CULT, isDiverCafeMember, getCafeMemberRoster } from "../config.js";
 import { iconDataUri, resolveSceneImage, personAvatarDataUri } from "../avatar.js";
 import { getPhoto } from "../data/photos.js";
 import { openWindow } from "../windowManager.js";
@@ -137,7 +139,7 @@ function cultNav(active) {
   const items = [
     ["home", "홈"],
     ["about", "소개"],
-    ["leader", "{{CULT_LEADER_TITLE}} 소개"],
+    ["leader", "{{LEADER}} 소개"],
     ["beliefs", "교리"],
     ["events", "행사"],
     ["board", "게시판"],
@@ -224,6 +226,41 @@ function diverLoginGate() {
   return `<div class="diver-placeholder">로그인이 필요한 서비스입니다.<br/><br/><button data-nav="diver:/home">홈으로 가서 로그인</button></div>`;
 }
 
+// 카페는 다이버 로그인과 별개로, 카페 "회원"으로 등록된 계정만 들어갈 수 있는
+// 회원제 비공개 카페다 (설정: 공식 창립 이전, 영림대학교 봉사동아리 시절부터
+// 원로회를 비롯한 간부들이 쓰던 카페). 일반 다이버 로그인 성공만으로는 접근할
+// 수 없고, 로그인한 아이디가 DIVER_CAFE_MEMBERS 명단과 일치해야 한다.
+function diverCafeMemberGate() {
+  return `<div class="diver-placeholder">이 카페는 회원제 비공개 카페입니다.<br/>등록된 회원 계정으로만 접근할 수 있습니다.<br/><br/><button data-nav="diver:/home">홈으로</button></div>`;
+}
+
+function diverCafeContent() {
+  const roster = getCafeMemberRoster();
+  return renderText(`
+    <div class="diver-cafe-intro">
+      <h3 style="margin:0 0 6px;font-size:15px;">{{CULT_FOUNDING_PLACE}} — 비공개 카페</h3>
+      <p style="font-size:12.5px;color:#777;margin:0 0 16px;">
+        {{CULT_NAME}}의 공식 창립(대외 기준 {{CULT_FOUNDED}}년)보다 앞서 만들어진
+        회원제 카페입니다. 가입된 회원 계정으로만 게시판을 볼 수 있습니다.
+      </p>
+    </div>
+    <div class="diver-cafe-members">
+      <h4 style="font-size:13px;margin:0 0 8px;">회원 (${roster.length})</h4>
+      <ul style="list-style:none;padding:0;margin:0 0 18px;font-size:12.5px;">
+        ${roster
+          .map(
+            (m) =>
+              `<li style="padding:4px 0;border-bottom:1px solid #f1f3f5;">${renderText(m.person.name)} · ${renderText(m.person.publicRole || "")} — ${
+                m.diverId ? m.diverId : '<span style="color:#bbb;">(계정 미확정)</span>'
+              }</li>`
+          )
+          .join("")}
+      </ul>
+    </div>
+    ${diverPlaceholder("이 카페의 게시글")}
+  `);
+}
+
 function wireDiverChrome(frame, go) {
   wireNav(frame, go);
   const input = frame.querySelector("#diver-search-input");
@@ -273,12 +310,17 @@ function renderDiver(path, frame, go) {
       </div>
     `);
   } else if (page === "cafe") {
+    const isCafeMember = diverLoggedIn && isDiverCafeMember(getDiverAccountId());
+    let cafeBody;
+    if (!diverLoggedIn) cafeBody = diverLoginGate();
+    else if (!isCafeMember) cafeBody = diverCafeMemberGate();
+    else cafeBody = diverCafeContent();
     frame.innerHTML = renderText(`
       <div class="diver-site">
         ${diverHeader("")}
         <div class="diver-body">
           <h2 class="diver-section-title">내 카페</h2>
-          ${diverLoggedIn ? diverPlaceholder("카페") + diverStubCards() : diverLoginGate()}
+          ${cafeBody}
         </div>
       </div>
     `);
@@ -356,6 +398,7 @@ function renderDiver(path, frame, go) {
     const pwv = frame.querySelector("#diver-home-pw").value.trim();
     if (idv && pwv) {
       setFlag(FLAGS.DIVER_LOGIN_SUCCESS);
+      setDiverAccountId(idv);
       go("diver:/home");
     } else {
       frame.querySelector("#diver-home-login-error").textContent = "아이디와 비밀번호를 입력해주세요.";
@@ -364,6 +407,7 @@ function renderDiver(path, frame, go) {
   frame.querySelector("#diver-logout-link")?.addEventListener("click", (e) => {
     e.preventDefault();
     clearFlag(FLAGS.DIVER_LOGIN_SUCCESS);
+    setDiverAccountId("");
     go("diver:/home");
   });
 }
@@ -372,16 +416,17 @@ function renderCult(path, frame, go) {
   const page = path.split("/")[1] || "home";
 
   if (page === "home") {
+    const hasSlogan = !CULT_BELIEFS.coreQuote.startsWith("__TBD");
     frame.innerHTML = renderText(`
       <div class="cult-site">
         ${cultNav("home")}
         <div class="cult-hero">
           <img src="${resolveSceneImage("IMG-CULT-HQ-01", "본부 외관")}" class="zoomable-img" alt="본부 외관" style="max-width:320px;margin:0 auto 14px;" />
           <h1>{{CULT_NAME}}</h1>
-          <p>{{CULT_SLOGAN}}</p>
+          ${hasSlogan ? `<p>${renderText(CULT_BELIEFS.coreQuote)}</p>` : ""}
         </div>
         <div class="cult-section">
-          <h2>{{LEADER}} {{CULT_LEADER_TITLE}}의 인사말</h2>
+          <h2>{{LEADER}} {{CULT_LEADER_EPITHET}}의 인사말</h2>
           <p>안녕하세요, {{CULT_NAME}}입니다. 늘 이웃과 함께하는 공동체가 되겠습니다.</p>
         </div>
         <div class="cult-section">
@@ -400,15 +445,30 @@ function renderCult(path, frame, go) {
     frame.innerHTML = renderText(`<div class="cult-site">${cultNav("leader")}
       <div class="cult-section">
         <img src="${personAvatarDataUri(PEOPLE.LEADER.name, PEOPLE.LEADER.avatarSeed, PEOPLE.LEADER.avatarColor)}" class="zoomable-img" alt="{{LEADER}} 프로필" style="max-width:200px;" />
-        <h2>{{LEADER}} {{CULT_LEADER_TITLE}}</h2>
+        <h2>{{LEADER}} · {{CULT_LEADER_EPITHET}}</h2>
         <p style="white-space:pre-wrap;">${renderText(CULT_LEADER_BIO)}</p>
         <img src="${resolveSceneImage("IMG-JEONGHO-SPEECH-01", "{{LEADER}} 설교 중")}" class="zoomable-img" alt="{{LEADER}} 설교 중" style="max-width:320px;margin-top:12px;" />
       </div>
     </div>`);
   } else if (page === "beliefs") {
-    frame.innerHTML = `<div class="cult-site">${cultNav("beliefs")}
-      <div class="cult-section"><h2>교리 소개</h2><p>${renderText(CULT_BELIEFS.publicIntro)}</p></div>
-    </div>`;
+    const showQuote = !CULT_BELIEFS.coreQuote.startsWith("__TBD");
+    const showLifeRules = !CULT_BELIEFS.lifeRules.startsWith("__TBD");
+    frame.innerHTML = renderText(`<div class="cult-site">${cultNav("beliefs")}
+      <div class="cult-section">
+        <h2>소개하는 말</h2>
+        <p style="white-space:pre-wrap;">${renderText(CULT_BELIEFS.publicIntro)}</p>
+        ${showQuote ? `<p style="font-weight:700;margin-top:10px;">"${renderText(CULT_BELIEFS.coreQuote)}"</p>` : ""}
+      </div>
+      <div class="cult-section">
+        <h2>상징</h2>
+        <div class="cult-card-grid">
+          <div class="cult-card"><b>연꽃</b><br/>${CULT.symbolism.lotus}</div>
+          <div class="cult-card"><b>태양</b><br/>${CULT.symbolism.sun}</div>
+          <div class="cult-card"><b>새벽</b><br/>${CULT.symbolism.dawn}</div>
+        </div>
+      </div>
+      ${showLifeRules ? `<div class="cult-section"><h2>함께하는 생활</h2><p>${renderText(CULT_BELIEFS.lifeRules)}</p></div>` : ""}
+    </div>`);
   } else if (page === "events") {
     frame.innerHTML = `<div class="cult-site">${cultNav("events")}
       <div class="cult-hero" style="padding:0;">
@@ -461,7 +521,7 @@ function renderArchive(path, frame, go) {
       <div class="cult-section">
         <h2>초기 모임 사진</h2>
         <img src="${resolveSceneImage("IMG-EARLY-GROUP-01", "창립 이전 모임")}" class="zoomable-img" alt="창립 이전 모임" style="max-width:320px;" id="archive-photo" />
-        <p style="font-size:12px;color:var(--text-secondary);">1997년경으로 추정. 이정호로 보이는 인물은 없음.</p>
+        <p style="font-size:12px;color:var(--text-secondary);">1998년경으로 추정. 이정호로 보이는 인물은 없음.</p>
       </div>
       <div class="cult-section">
         <h2>옛 회원 명단 (일부)</h2>
